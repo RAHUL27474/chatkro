@@ -106,9 +106,6 @@ const Header = () => {
               }}
             />
             <Box>
-              suggested friends
-            </Box>
-            <Box>
               <IconBtn
                 title={"Search"}
                 icon={<SearchIcon />}
@@ -139,9 +136,7 @@ const Header = () => {
                 icon={<LogoutIcon />}
                 onClick={logoutHandler}
               />
-            </Box>
-            
-
+            </Box>z
           </Toolbar>
         </AppBar>
       </Box>
