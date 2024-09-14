@@ -1,7 +1,7 @@
 require("dotenv").config();
 const corsOptions = {
   origin: [
-    "https://krochat.netlify.app",
+    "https://yestalky.netlify.app",
     process.env.CLIENT_URL,
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
