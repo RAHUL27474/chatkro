@@ -137,6 +137,10 @@ const Header = () => {
                 onClick={logoutHandler}
               />
             </Box>
+            <Box>
+              suggested friends
+            </Box>
+
           </Toolbar>
         </AppBar>
       </Box>
