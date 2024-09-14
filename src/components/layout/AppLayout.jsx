@@ -33,7 +33,6 @@ const AppLayout = (WrappedComponent) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const socket = useSocket();
-    const [isrecommend,setisrecommend]=useState(false);
 
     const chatId = params.chatId;
     const deleteMenuAnchor = useRef(null);
@@ -96,9 +95,6 @@ const AppLayout = (WrappedComponent) => {
     return (
       <>
         <Title />
-        <div>
-          Recommend Friends
-        </div>
         <Header />
 
         <DeleteChatMenu
@@ -158,9 +154,7 @@ const AppLayout = (WrappedComponent) => {
               bgcolor: "rgba(0,0,0,0.85)",
             }}
           >
-          isrecommend ? <div>
-d
-          </div>  :  <Profile user={user} />
+            <Profile user={user} />
           </Grid>
         </Grid>
       </>
