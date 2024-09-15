@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { apiConnector } from "../utils/Apiconnecter";
 import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
@@ -19,17 +20,30 @@ import { bgGradient } from "../constants/color";
 import { server } from "../constants/config";
 import { userExists } from "../redux/reducers/auth";
 import { usernameValidator } from "../utils/validators";
+import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { setuserdata } from "../redux/reducers/auth";
 
 const Login = () => {
+  const navigate=useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+
+
 
   const toggleLogin = () => setIsLogin((prev) => !prev);
 
-  const name = useInputValidation("");
-  const bio = useInputValidation("");
-  const username = useInputValidation("", usernameValidator);
-  const password = useInputValidation("");
+  // firstname = useInputValidation("");
+  // lastname = useInputValidation("");
+  // email = useInputValidation("");
+  // username = useInputValidation("", usernameValidator);
+  // password = useInputValidation("");
 
   const avatar = useFileHandler("single");
 
@@ -52,8 +66,8 @@ const Login = () => {
       const { data } = await axios.post(
         `${server}/api/v1/user/login`,
         {
-          username: username.value,
-          password: password.value,
+          firstname: firstname,
+          password: password,
         },
         config
       );
@@ -69,20 +83,26 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-
-  const handleSignUp = async (e) => {
+  
+  const handleSignUp = async (e) => {  
     e.preventDefault();
 
     const toastId = toast.loading("Signing Up...");
     setIsLoading(true);
 
     const formData = new FormData();
+    console.log(firstname)
     formData.append("avatar", avatar.file);
-    formData.append("name", name.value);
-    formData.append("bio", bio.value);
-    formData.append("username", username.value);
-    formData.append("password", password.value);
-
+    formData.append("firstname", firstname);
+    console.log(lastname)
+    formData.append("lastname", lastname);
+    console.log(email)
+    formData.append("email", email);
+    console.log(username)
+    formData.append("username", username);
+    console.log(password)
+    formData.append("password", password);
+    
     const config = {
       withCredentials: true,
       headers: {
@@ -91,17 +111,51 @@ const Login = () => {
     };
 
     try {
-      const { data } = await axios.post(
-        `${server}/api/v1/user/new`,
-        formData,
-        config
-      );
+      // const formData1 = new FormData();
+      // formData1.append("email", email);
+      // formData1.append("username", username);
+      // console.log(formData1)
+      
+      const response1=await apiConnector(
+        "POST",
+        `${server}/api/v1/auth/sendotp`,
+        {email,username},
+    )
+    console.log("send otp respones => ",response1);
+      if(response1.data.data.success ){
+        throw Error;
+      }
+      dispatch(setuserdata({
+        firstname,lastname,email,username,password
+      }))
+      navigate("/verify-otp");
+      // const { response1 } = await axios.post(
+      //   `${server}/api/v1/auth/sendotp`,
+      //   {
+      //     email,
+      //     username
+      //   },
+      //   config
+      // );
+      
 
-      dispatch(userExists(data.user));
-      toast.success(data.message, {
-        id: toastId,
-      });
+
+
+
+
+      // const { data } = await axios.post(
+      //   `${server}/api/v1/user/new`,
+      //   formData,
+      //   config
+      // );
+
+      // dispatch(userExists(data.user));
+      // toast.success(data.message, {
+      //   id: toastId,
+      // });
+      
     } catch (error) {
+      console.log(error.message)
       toast.error(error?.response?.data?.message || "Something Went Wrong", {
         id: toastId,
       });
@@ -148,11 +202,11 @@ const Login = () => {
                 <TextField
                   required
                   fullWidth
-                  label="Username"
+                  label="Email"
                   margin="normal"
                   variant="outlined"
-                  value={username.value}
-                  onChange={username.changeHandler}
+                  value={email.value}
+                  onChange={email.changeHandler}
                 />
 
                 <TextField
@@ -240,41 +294,53 @@ const Login = () => {
                   <Typography
                     m={"1rem auto"}
                     width={"fit-content"}
-                    display={"block"}
+                    display={"block"}  
                     color="error"
                     variant="caption"
                   >
                     {avatar.error}
                   </Typography>
                 )}
-
+                
                 <TextField
                   required
                   fullWidth
-                  label="Name"
+                  label="First Name"
                   margin="normal"
                   variant="outlined"
-                  value={name.value}
-                  onChange={name.changeHandler}
+                  value={firstname}
+                  onChange={(e)=>{setFirstname(e.target.value)}}
                 />
 
                 <TextField
                   required
                   fullWidth
-                  label="Bio"
+                  label="Last Name"
                   margin="normal"
                   variant="outlined"
-                  value={bio.value}
-                  onChange={bio.changeHandler}
+                  value={lastname}
+                  onChange={(e)=>{setLastname(e.target.value)}}
                 />
+
+                <TextField
+                  required
+                  fullWidth
+                  label="Email Id"
+                  margin="normal"
+                  variant="outlined"
+                  value={email}
+                  onChange={(e)=>{setEmail(e.target.value)}}
+                />
+                
+                
                 <TextField
                   required
                   fullWidth
                   label="Username"
                   margin="normal"
                   variant="outlined"
-                  value={username.value}
-                  onChange={username.changeHandler}
+                  value={username}
+                  onChange={(e)=>{setUsername(e.target.value)}}
                 />
 
                 {username.error && (
@@ -286,12 +352,12 @@ const Login = () => {
                 <TextField
                   required
                   fullWidth
-                  label="Password"
+                  label="Set Your Password"
                   type="password"
                   margin="normal"
                   variant="outlined"
-                  value={password.value}
-                  onChange={password.changeHandler}
+                  value={password}
+                  onChange={(e)=>{setPassword(e.target.value)}}
                 />
 
                 <Button

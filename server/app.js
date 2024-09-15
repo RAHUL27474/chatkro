@@ -26,12 +26,13 @@ const { socketAuthenticator } =require("./middlewares/auth.js") ;
 const userRoute =require("./routes/user.js") ;
 const chatRoute =require("./routes/chat.js") ;
 const adminRoute =require("./routes/admin.js") ;
+const authRoute =require("./routes/auth.js") ;
 
 const {databaseConnect}=require("./config/ConnectToDatabase");
 const {cloudinaryConnect}=require("./config/ConnectToCloudinary");
 
 const mongoURI = process.env.MONGO_URI;
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const envMode = process.env.NODE_ENV.trim() || "PRODUCTION";
 const adminSecretKey = process.env.ADMIN_SECRET_KEY || "adsasdsdfsdfsdfd";
 const userSocketIDs = require("./utils/socketstore.js");
@@ -59,6 +60,7 @@ app.use(cors(corsOptions));
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/chat", chatRoute);
 app.use("/api/v1/admin", adminRoute);
+app.use("/api/v1/auth", authRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
@@ -105,7 +107,8 @@ io.on("connection", (socket) => {
     try {
       await Message.create(messageForDB);
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      
     }
   });
 

@@ -4,9 +4,7 @@ const {
   getMyFriends,
   getMyNotifications,
   getMyProfile,
-  login,
   logout,
-  newUser,
   searchUser,
   sendFriendRequest,
 } =require( "../controllers/user.js");
@@ -22,8 +20,8 @@ const { singleAvatar } =require("../middlewares/multer.js") ;
 
 const app = express.Router();
 
-app.post("/new", singleAvatar, registerValidator(), validateHandler, newUser);
-app.post("/login", loginValidator(), validateHandler, login);
+// app.post("/new", singleAvatar, registerValidator(), validateHandler, newUser);
+// app.post("/login", loginValidator(), validateHandler, login);
 
 // After here user must be logged in to access the routes
 

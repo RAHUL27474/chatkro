@@ -8,6 +8,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { userExists, userNotExists } from "./redux/reducers/auth";
 import { Toaster } from "react-hot-toast";
 import { SocketProvider } from "./socket";
+import Verifyotp from "./pages/Verifyotp";
+import Forgotpassword from "./pages/Forgotpassword";
+import Updatepassword from "./pages/Updatepassword";
+
 
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
@@ -39,8 +43,10 @@ const App = () => {
     <LayoutLoader />
   ) : (
     <BrowserRouter>
+          
       <Suspense fallback={<LayoutLoader />}>
         <Routes>
+          
           <Route
             element={
               <SocketProvider>
@@ -49,6 +55,7 @@ const App = () => {
             }
           >
             <Route path="/" element={<Home />} />
+            
             <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/groups" element={<Groups />} />
           </Route>
@@ -61,6 +68,10 @@ const App = () => {
               </ProtectRoute>
             }
           />
+          <Route path='/verify-otp' element={<Verifyotp/>}/>
+          <Route path='/forgotpassword' element={<Forgotpassword/>} />                    
+          <Route path='/updatepassword/:token' element={<Updatepassword/>}/> 
+
 
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
