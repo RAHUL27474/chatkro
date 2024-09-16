@@ -12,7 +12,7 @@ const router=express.Router();
 
 //user routes
 router.post("/sendotp",sendotp);
-router.post("/signup", singleAvatar, registerValidator(), validateHandler,signup);
+router.post("/signup", registerValidator(), validateHandler,signup);
 router.post("/login", loginValidator(), validateHandler, login);
 router.post("/forgotpasswordtoken",forgotpasswordtoken);
 router.post("/forgotpassword",forgotpassword);

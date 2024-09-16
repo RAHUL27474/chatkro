@@ -33,6 +33,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [input, setInput] = useState("");
 
 
 
@@ -63,19 +64,23 @@ const Login = () => {
     };
 
     try {
-      const { data } = await axios.post(
-        `${server}/api/v1/user/login`,
+      
+      const { data } = await apiConnector(
+        "POST",
+        `${server}/api/v1/auth/login`,
         {
-          firstname: firstname,
-          password: password,
+          input,
+          password,
         },
-        config
+        
       );
+      console.log(data)
       dispatch(userExists(data.user));
       toast.success(data.message, {
         id: toastId,
       });
     } catch (error) {
+      console.log("error is ",error);
       toast.error(error?.response?.data?.message || "Something Went Wrong", {
         id: toastId,
       });
@@ -103,12 +108,12 @@ const Login = () => {
     console.log(password)
     formData.append("password", password);
     
-    const config = {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    };
+    // const config = {
+    //   withCredentials: true,
+    //   headers: {
+    //     "Content-Type": "multipart/form-data",
+    //   },
+    // };
 
     try {
       // const formData1 = new FormData();
@@ -122,12 +127,13 @@ const Login = () => {
         {email,username},
     )
     console.log("send otp respones => ",response1);
-      if(response1.data.data.success ){
+      if(response1?.data?.data?.success ){
         throw Error;
       }
       dispatch(setuserdata({
         firstname,lastname,email,username,password
       }))
+      // dispatch(userExists(data.user));
       navigate("/verify-otp");
       // const { response1 } = await axios.post(
       //   `${server}/api/v1/auth/sendotp`,
@@ -202,11 +208,11 @@ const Login = () => {
                 <TextField
                   required
                   fullWidth
-                  label="Email"
+                  label="Email or Username"
                   margin="normal"
                   variant="outlined"
-                  value={email.value}
-                  onChange={email.changeHandler}
+                  value={input}
+                  onChange={(e)=>{setInput(e.target.value)}}
                 />
 
                 <TextField
@@ -216,8 +222,8 @@ const Login = () => {
                   type="password"
                   margin="normal"
                   variant="outlined"
-                  value={password.value}
-                  onChange={password.changeHandler}
+                  value={password}
+                  onChange={(e)=>{setPassword(e.target.value)}}
                 />
 
                 <Button

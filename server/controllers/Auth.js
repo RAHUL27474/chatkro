@@ -8,6 +8,7 @@ const otpgenerator=require("otp-generator");
 const {signuptemplate}=require("../mailtemplates/Signup")
 const {forgotpasswordtemplate}=require("../mailtemplates/ForgotpasswordLink");
 const {mailsender}=require("../utils/SendMail");
+const {sendToken}=require("../utils/features")
 require("dotenv").config();
 
 //send otp logic
@@ -82,24 +83,24 @@ exports.signup=async (req,res,next)=>{
                 message:"User Already Registered",
             })
         }
-        const file = req.file;
+        // const file = req.file;
 
-        let avatar;
-        if (file) {
-            // If file is present, upload to Cloudinary
-            const result = await uploadFilesToCloudinary([file]);
-            avatar = {
-                public_id: result[0].public_id,
-                url: result[0].url,
-            };
-        } else {
-            // If no file is present, use the SVG link based on first and last name
-            const svgLink = `https://api.dicebear.com/5.x/initials/svg?seed=${firstname} ${lastname}`;
-            avatar = {
-                public_id: null, // No Cloudinary public_id
-                url: svgLink,
-            };
-        }
+        // let avatar;
+        // if (file) {
+        //     // If file is present, upload to Cloudinary
+        //     const result = await uploadFilesToCloudinary([file]);
+        //     avatar = {
+        //         public_id: result[0].public_id,
+        //         url: result[0].url,
+        //     };
+        // } else {
+        //     // If no file is present, use the SVG link based on first and last name
+        //     const svgLink = `https://api.dicebear.com/5.x/initials/svg?seed=${firstname} ${lastname}`;
+        //     avatar = {
+        //         public_id: null, // No Cloudinary public_id
+        //         url: svgLink,
+        //     };
+        // }
         // if(password!==confirmpassword){
         //     return res.json({
         //         success:false,
@@ -115,12 +116,12 @@ exports.signup=async (req,res,next)=>{
         //         })
         //     }
         // }
-        const latestotp=await Otp.find({email}).sort({createdate:"desc"}).limit(1);
+        const latestotp=await Otp.findOne({email}).sort({createdate:"desc"});
         console.log("latest otp is ==============================:",latestotp);
         console.log(latestotp.otp)
         console.log(otp)
         console.log(latestotp.otp!==otp)
-        if(!latestotp || latestotp[0].otp!==otp){
+        if(!latestotp || latestotp.otp!==otp){
             return res.json({
                 success:false,
                 message:"OTP Not Found"
@@ -128,13 +129,13 @@ exports.signup=async (req,res,next)=>{
         }
         console.log("otp is verified");
         const hashedpassword=await bcrypt.hash(password,10);
-
-        const profiledetails=await Profile.create({
-            gender:null,
-            dateofbirth:null,
-            about:null,
-            contactno:null,
-        })
+        console.log(hashedpassword);
+        // const profiledetails=await Profile.create({
+        //     gender:null,
+        //     dateofbirth:null,
+        //     about:null,
+        //     contactno:null,
+        // })
 
         const userdata=await User.create({
             firstname,
@@ -142,18 +143,17 @@ exports.signup=async (req,res,next)=>{
             email,
             username,
             password: hashedpassword,
-            additionaldetails:profiledetails._id,
-            avatar
+            // avatar,
         })
-        const mailresponse=await mailsender(email,"Signup Successfull",signuptemplate(accounttype));
-        res.json({
-            success:true,
-            message:"User Created Successfully",
-            data:userdata,
-        })
+        const mailresponse=await mailsender(email,"Signup Successfull",signuptemplate("accounttype"));
+        // res.json({
+        //     success:true,
+        //     message:"User Created Successfully",
+        //     data:userdata,
+        // })
         console.log("user saved in database");
 
-        sendToken(res, user, 201, "User created");
+        sendToken(res, userdata, 201, "User created");
 
 
 
@@ -180,6 +180,8 @@ exports.login=async (req,res)=>{
                 message: "All Fields are Required",
             });
         }
+        console.log(input)
+        console.log(password)
 
         // Check if the input is an email or username
         const isEmail = input.includes("@");
@@ -187,8 +189,8 @@ exports.login=async (req,res)=>{
         // Find the user by email or username
         const user = await User.findOne(
             isEmail ? { email: input } : { username: input }
-        ).populate("additionaldetails").exec();
-
+        ).exec();
+        console.log("1")
         if (!user) {
             return next(
                 new ErrorHandler(
@@ -197,17 +199,16 @@ exports.login=async (req,res)=>{
                 )
             );
         }
-        
-        
+        console.log(user.password);
         //match the password and make the jwt token and send trouhgn cookie.
-        if(await bcrypt.compare(password,user.hashedpassword)){
+        if(await bcrypt.compare(password,user.password)){
             console.log("password matched successfully")
             // const payload = {
             //     id: user._id,
             //     ...(isEmail ? { email: user.email } : { username: user.username }),
             // };
             
-            user.hashedpassword=undefined;
+            user.password=undefined;
             user.forgotpasswordlink=undefined;
             user.forgotpasswordlinkexpires=undefined;
             sendToken(res, user, 200, `Welcome Back, ${user.name}`);
@@ -221,6 +222,7 @@ exports.login=async (req,res)=>{
         }
     }
     catch(err){
+        console.log("ertyuio",err)
         return res.json({
             success:false,
             message:err.message,

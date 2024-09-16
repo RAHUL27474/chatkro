@@ -4,11 +4,15 @@ const { hash }=require("bcrypt") ;
 
 const schema = new Schema(
   {
-    name: {
+    firstname: {
       type: String,
       required: true,
     },
-    bio: {
+    lastname: {
+      type: String,
+      required: true,
+    },
+    email: {
       type: String,
       required: true,
     },
@@ -20,16 +24,20 @@ const schema = new Schema(
     password: {
       type: String,
       required: true,
-      select: false,
+    },
+    forgotpasswordlink:{
+      type:String,
+    },
+    forgotpasswordlinkexpires:{
+        type:Date,
     },
     avatar: {
       public_id: {
         type: String,
-        required: true,
+        
       },
       url: {
         type: String,
-        required: true,
       },
     },
   },
@@ -38,10 +46,10 @@ const schema = new Schema(
   }
 );
 
-schema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+// schema.pre("save", async function (next) {
+//   if (!this.isModified("password")) return next();
 
-  this.password = await hash(this.password, 10);
-});
+//   this.password = await hash(this.password, 10);
+// });
 
 module.exports= User = mongoose.models.User || model("User", schema);
